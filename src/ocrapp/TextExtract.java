@@ -79,7 +79,7 @@ public class TextExtract {
                 Imgproc.rectangle(rgb, rect.br() , new Point( rect.br().x-rect.width ,rect.br().y-rect.height),  new Scalar(0, 255, 0));
             }
 
-            String outputfile = "trovato.png";
+            String outputfile = "rectangle-text.png";
             Imgcodecs.imwrite(outputfile,rgb);
             
         }   
