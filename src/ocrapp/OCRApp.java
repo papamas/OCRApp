@@ -31,10 +31,7 @@ public class OCRApp {
      */
     public static void main(String[] args) {
         
-        //String libPathProperty = System.getProperty("java.library.path");
-        //System.out.println(libPathProperty);
-       
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         //load the image and compute the ratio of the old height
         Mat src = Imgcodecs.imread("sample/receipt.jpg");
         
@@ -59,15 +56,18 @@ public class OCRApp {
         System.out.println("STEP 1: Edge Detection");
                 
         List<MatOfPoint> contoursList = new ArrayList<>();
-        List<MatOfPoint> contoursRect = new ArrayList<>();
+        
         Imgproc.findContours(edged, 
                 contoursList,
                 new Mat(),
                 Imgproc.RETR_LIST,
                 Imgproc.CHAIN_APPROX_SIMPLE,
                 new Point(0,0));
+       
         // Draw all the contours such that they are filled in.
         MatOfPoint2f approxCurve = new MatOfPoint2f();
+        Mat contourImg = new Mat(src.size(), src.type());
+        
         for (int i = 0; i < contoursList.size(); i++) {
             System.out.println("STEP 2: Find contours of paper");
              //Convert contours from MatOfPoint to MatOfPoint2f
@@ -85,47 +85,29 @@ public class OCRApp {
                         Math.abs(Imgproc.contourArea(points)) > 1000 && 
                         Imgproc.isContourConvex(points))
                 {
-                   
-                    Imgproc.drawContours(src ,
+                    System.out.println( rect.tl().toString());
+                            
+                    Imgproc.drawContours(contourImg ,
                             contoursList,
                             i,
-                            new Scalar(0, 255, 0),
-                            2);
-                   
+                            new Scalar(255, 255, 255),
+                            -1);
+                    
+                       
                    
                 }
             }           
         }
-        Imgcodecs.imwrite("outline.jpg", src); // DEBUG
+        
+        Imgcodecs.imwrite("outline.jpg", contourImg); // DEBUG
+       
+       
+       
+        
+        
         
     }
     
-    public Mat warp(Mat inputMat, Mat startM, Rect rect) {
-
-        int resultWidth = rect.width;
-        int resultHeight = rect.height;
-
-        Point ocvPOut4, ocvPOut1, ocvPOut2, ocvPOut3;
-
-        ocvPOut1 = new Point(0, 0);
-                ocvPOut2 = new Point(0, resultHeight);
-                ocvPOut3 = new Point(resultWidth, resultHeight);
-                ocvPOut4 = new Point(resultWidth, 0);
-
-        Mat outputMat = new Mat(resultWidth, resultHeight, CvType.CV_8UC4);
-
-        List<Point> dest = new ArrayList<Point>();
-        dest.add(ocvPOut1);
-        dest.add(ocvPOut2);
-        dest.add(ocvPOut3);
-        dest.add(ocvPOut4);
-        Mat endM = Converters.vector_Point2f_to_Mat(dest);
-
-        Mat perspectiveTransform = Imgproc.getPerspectiveTransform(startM, endM);
-
-        Imgproc.warpPerspective(inputMat, outputMat, perspectiveTransform, new Size(resultWidth, resultHeight), Imgproc.INTER_CUBIC);
-
-        return outputMat;
-    }
+    
     
 }
